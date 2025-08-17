@@ -4,16 +4,10 @@
 
 App::App()
 	:
-	wnd( 800,600,"The Donkey Fart Box" )
+	wnd( 1080, 1080,"Howie Mandelbrot" )
 {
-	std::mt19937 rng( std::random_device{}() );
-	std::uniform_real_distribution<float> adist( 0.0f,3.1415f * 2.0f );
-	std::uniform_real_distribution<float> ddist( 0.0f,3.1415f * 2.0f );
-	std::uniform_real_distribution<float> odist( 0.0f,3.1415f * 0.3f );
-	std::uniform_real_distribution<float> rdist( 6.0f,20.0f );
-
 	quad.push_back( std::make_unique<Quad>(wnd.Gfx()) );
-	wnd.Gfx().SetProjection( DirectX::XMMatrixPerspectiveLH( 1.0f,3.0f / 4.0f,0.5f,40.0f ) ); // can we get rid of this? or just change to be normal view
+	// wnd.Gfx().SetProjection( DirectX::XMMatrixPerspectiveLH( 1.0f,3.0f / 4.0f,0.5f,40.0f ) ); // can we get rid of this? or just change to be normal view
 }
 
 int App::Go()
@@ -36,7 +30,7 @@ App::~App()
 void App::DoFrame()
 {
 	auto dt = timer.Mark();
-	wnd.Gfx().ClearBuffer( 0.07f,0.0f,0.12f );
+	wnd.Gfx().ClearBuffer( 0,0,0 );
 	for( auto& q : quad )
 	{
 		q->Update( dt );
