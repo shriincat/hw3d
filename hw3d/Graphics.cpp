@@ -61,6 +61,7 @@ Graphics::Graphics( HWND hWnd )
 	GFX_THROW_INFO( pSwap->GetBuffer( 0,__uuidof(ID3D11Resource),&pBackBuffer ) );
 	GFX_THROW_INFO( pDevice->CreateRenderTargetView( pBackBuffer.Get(),nullptr,&pTarget ) );
 	
+	/*
 	// create depth stensil state
 	D3D11_DEPTH_STENCIL_DESC dsDesc = {};
 	dsDesc.DepthEnable = TRUE;
@@ -97,6 +98,8 @@ Graphics::Graphics( HWND hWnd )
 
 	// bind depth stensil view to OM
 	pContext->OMSetRenderTargets( 1u,pTarget.GetAddressOf(),pDSV.Get() );
+	*/
+	pContext->OMSetRenderTargets(1u, pTarget.GetAddressOf(), nullptr);
 	   
 	// configure viewport
 	D3D11_VIEWPORT vp;
@@ -132,7 +135,7 @@ void Graphics::ClearBuffer( float red,float green,float blue ) noexcept
 {
 	const float color[] = { red,green,blue,1.0f };
 	pContext->ClearRenderTargetView( pTarget.Get(),color );
-	pContext->ClearDepthStencilView( pDSV.Get(),D3D11_CLEAR_DEPTH,1.0f,0u );
+	// pContext->ClearDepthStencilView( pDSV.Get(),D3D11_CLEAR_DEPTH,1.0f,0u );
 }
 
 void Graphics::DrawIndexed( UINT count ) noexcept(!IS_DEBUG)

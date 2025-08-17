@@ -9,18 +9,19 @@ cbuffer CBuf
 float4 main(float4 pos : SV_Position) : SV_Target
 {
 	float halfRes = res * 0.5f;
-	double2 c =
+	float2 c =
 	{
-		((((double) pos.x - halfRes)) / halfRes) * radius + centerX,
-		-(((double) pos.y - halfRes) / halfRes) * radius + centerY};
-	double2 z = { 0.0, 0.0 };
+		((((float) pos.x - halfRes)) / halfRes) * radius + centerX,
+		-(((float) pos.y - halfRes) / halfRes) * radius + centerY
+	};
+	float2 z = { 0.0, 0.0 };
 
 	int i;
 	int max = 120;
 	for (i = 0; i < max; i++)
 	{
-		double x = (z.x * z.x - z.y * z.y);
-		double y = (z.x * z.y + z.y * z.x);
+		float x = (z.x * z.x - z.y * z.y);
+		float y = (z.x * z.y + z.y * z.x);
 		z.x = x;
 		z.y = y;
 		z += c;

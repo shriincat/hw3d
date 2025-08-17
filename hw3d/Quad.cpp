@@ -31,7 +31,7 @@ Quad::Quad(Graphics& gfx)
 
 		const std::vector<unsigned short> indices =
 		{
-			0,1,2, 1,3,2
+			1,0,2, 3,1,2
 		};
 		AddStaticIndexBuffer(std::make_unique<IndexBuffer>(gfx, indices));
 
@@ -49,9 +49,9 @@ Quad::Quad(Graphics& gfx)
 		{
 			{
 				1080,
-				radius,
-				centerX,
-				centerY
+				2.0f,
+				0.0f,
+				0.0f
 			}
 		};
 		AddStaticBind(std::make_unique<PixelConstantBuffer<ConstantBuffer>>(gfx, cb));
@@ -68,8 +68,6 @@ Quad::Quad(Graphics& gfx)
 	{
 		SetIndexFromStatic();
 	}
-
-	// AddBind(std::make_unique<TransformCbuf>(gfx, *this)); // replace with pixelCbuf
 }
 
 void Quad::Update(float dt) noexcept
