@@ -35,27 +35,6 @@ Quad::Quad(Graphics& gfx)
 		};
 		AddStaticIndexBuffer(std::make_unique<IndexBuffer>(gfx, indices));
 
-		struct ConstantBuffer
-		{
-			struct
-			{
-				float resolution;
-				float radius;
-				float centerX;
-				float centerY;
-			} data;
-		};
-		const ConstantBuffer cb =
-		{
-			{
-				1080,
-				2.0f,
-				0.0f,
-				0.0f
-			}
-		};
-		AddStaticBind(std::make_unique<PixelConstantBuffer<ConstantBuffer>>(gfx, cb));
-
 		const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
 		{
 			{ "Position",0,DXGI_FORMAT_R32G32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
@@ -68,14 +47,41 @@ Quad::Quad(Graphics& gfx)
 	{
 		SetIndexFromStatic();
 	}
+
+	AddBind(std::make_unique<PixelCBuf>(gfx, *this));
 }
 
 void Quad::Update(float dt) noexcept
 {
-	// copy update code from shadertoy branch's App function here?
 }
 
-DirectX::XMMATRIX Quad::GetTransformXM() const noexcept
+void Quad::SetViewCenter(float centerX, float centerY)
 {
-	return DirectX::XMMatrixIdentity(); // not performing any vertex transformations, but must ovveride virtual function
+	this->centerX = centerX;
+	this->centerY = centerY;
+}
+
+void Quad::SetViewRadius(float radius) 
+{
+	this->radius = radius;
+}
+
+float Quad::GetRadius() const noexcept
+{
+	return radius;
+}
+
+float Quad::GetCenterX() const noexcept
+{
+	return centerX;
+}
+
+float Quad::GetCenterY() const noexcept
+{
+	return centerY;
+}
+
+DirectX::XMVECTOR Quad::GetTransformXM() const noexcept
+{
+	return DirectX::XMVectorSet(1080, radius, centerX, centerY); // not performing any vertex transformations, but must ovveride virtual function
 }

@@ -78,9 +78,6 @@
     <ClCompile Include="VertexBuffer.cpp">
       <Filter>Source Files\Bindable</Filter>
     </ClCompile>
-    <ClCompile Include="TransformCBuf.cpp">
-      <Filter>Source Files\Bindable</Filter>
-    </ClCompile>
     <ClCompile Include="Topology.cpp">
       <Filter>Source Files\Bindable</Filter>
     </ClCompile>
@@ -96,11 +93,11 @@
     <ClCompile Include="Drawable.cpp">
       <Filter>Source Files\Drawable</Filter>
     </ClCompile>
-    <ClCompile Include="Box.cpp">
-      <Filter>Source Files\Drawable</Filter>
-    </ClCompile>
     <ClCompile Include="Quad.cpp">
       <Filter>Source Files\Drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="PixelCBuf.cpp">
+      <Filter>Source Files\Bindable</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -167,16 +164,10 @@
     <ClInclude Include="ConstantBuffers.h">
       <Filter>Header Files\Bindable</Filter>
     </ClInclude>
-    <ClInclude Include="TransformCBuf.h">
-      <Filter>Header Files\Bindable</Filter>
-    </ClInclude>
     <ClInclude Include="BindableBase.h">
       <Filter>Header Files\Bindable</Filter>
     </ClInclude>
     <ClInclude Include="Drawable.h">
-      <Filter>Header Files\Drawable</Filter>
-    </ClInclude>
-    <ClInclude Include="Box.h">
       <Filter>Header Files\Drawable</Filter>
     </ClInclude>
     <ClInclude Include="DrawableBase.h">
@@ -187,6 +178,9 @@
     </ClInclude>
     <ClInclude Include="Quad.h">
       <Filter>Header Files\Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="PixelCBuf.h">
+      <Filter>Header Files\Bindable</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

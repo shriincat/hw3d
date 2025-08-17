@@ -4,10 +4,9 @@
 
 App::App()
 	:
-	wnd( 1080, 1080,"Howie Mandelbrot" )
+	wnd( 1080, 1080,"Howie Mandelbrot" ),
+	quad(Quad(wnd.Gfx()))
 {
-	quad.push_back( std::make_unique<Quad>(wnd.Gfx()) );
-	// wnd.Gfx().SetProjection( DirectX::XMMatrixPerspectiveLH( 1.0f,3.0f / 4.0f,0.5f,40.0f ) ); // can we get rid of this? or just change to be normal view
 }
 
 int App::Go()
@@ -20,6 +19,7 @@ int App::Go()
 			// if return optional has value, means we're quitting so return exit code
 			return *ecode;
 		}
+		Update();
 		DoFrame();
 	}
 }
@@ -27,14 +27,55 @@ int App::Go()
 App::~App()
 {}
 
+void App::Update()
+{
+	float dt = timer.Mark();
+	if (wnd.kbd.KeyIsPressed('R'))
+	{
+		radius /= 1.01f;
+	}
+	else if (wnd.kbd.KeyIsPressed('F'))
+	{
+		if (radius * 1.1f <= 2.0f)
+		{
+			radius *= 1.01f;
+		}
+	}
+	if (wnd.kbd.KeyIsPressed('W'))
+	{
+		if (centerY + dt <= 2.0f)
+		{
+			centerY += dt * radius;
+		}
+	}
+	else if (wnd.kbd.KeyIsPressed('S'))
+	{
+		if (centerY - dt >= -2.0f)
+		{
+			centerY -= dt * radius;
+		}
+	}
+	if (wnd.kbd.KeyIsPressed('D'))
+	{
+		if (centerX + dt <= 2.0f)
+		{
+			centerX += dt * radius;
+		}
+	}
+	else if (wnd.kbd.KeyIsPressed('A'))
+	{
+		if (centerX - dt >= -2.0f)
+		{
+			centerX -= dt * radius;
+		}
+	}
+	quad.SetViewCenter(centerX, centerY);
+	quad.SetViewRadius(radius);
+}
+
 void App::DoFrame()
 {
-	auto dt = timer.Mark();
 	wnd.Gfx().ClearBuffer( 0,0,0 );
-	for( auto& q : quad )
-	{
-		q->Update( dt );
-		q->Draw( wnd.Gfx() );
-	}
+	quad.Draw( wnd.Gfx() );
 	wnd.Gfx().EndFrame();
 }

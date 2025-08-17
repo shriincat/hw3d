@@ -1,6 +1,7 @@
 #pragma once
 #include "Window.h"
 #include "ChiliTimer.h"
+#include "Quad.h"
 
 class App
 {
@@ -10,9 +11,13 @@ public:
 	int Go();
 	~App();
 private:
+	void Update();
 	void DoFrame();
 private:
 	Window wnd;
 	ChiliTimer timer;
-	std::vector<std::unique_ptr<class Quad>> quad;
+	Quad quad;
+	float radius = 2;
+	float centerX = 0;
+	float centerY = 0;
 };
