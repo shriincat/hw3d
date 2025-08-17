@@ -99,6 +99,9 @@
     <ClCompile Include="Box.cpp">
       <Filter>Source Files\Drawable</Filter>
     </ClCompile>
+    <ClCompile Include="Quad.cpp">
+      <Filter>Source Files\Drawable</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WindowsMessageMap.h">
@@ -181,6 +184,9 @@
     </ClInclude>
     <ClInclude Include="WindowsThrowMacros.h">
       <Filter>Header Files\Macros</Filter>
+    </ClInclude>
+    <ClInclude Include="Quad.h">
+      <Filter>Header Files\Drawable</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -161,6 +161,7 @@
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="Mouse.cpp" />
     <ClCompile Include="PixelShader.cpp" />
+    <ClCompile Include="Quad.cpp" />
     <ClCompile Include="Topology.cpp" />
     <ClCompile Include="TransformCbuf.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
@@ -189,6 +190,7 @@
     <ClInclude Include="Keyboard.h" />
     <ClInclude Include="Mouse.h" />
     <ClInclude Include="PixelShader.h" />
+    <ClInclude Include="Quad.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Topology.h" />
     <ClInclude Include="TransformCbuf.h" />
