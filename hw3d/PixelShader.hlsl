@@ -6,76 +6,208 @@ cbuffer CBuf
 	float centerY;
 };
 
-float3 distance_from_sphere(float3 p, float3 c, float r)
+// whether turn on the animation
+//#define phase_shift_on 
+
+void ry(float3 p, float a)
 {
-	return length(p - c) - r;
+	float c, s;
+	float3 q = p;
+	c = cos(a);
+	s = sin(a);
+	p.x = c * q.x + s * q.z;
+	p.z = -s * q.x + c * q.z;
 }
+/* 
 
-float map_the_world(float3 p)
+z = r*(sin(theta)cos(phi) + i cos(theta) + j sin(theta)sin(phi)
+
+zn+1 = zn^8 +c
+
+z^8 = r^8 * (sin(8*theta)*cos(8*phi) + i cos(8*theta) + j sin(8*theta)*sin(8*theta)
+
+zn+1' = 8 * zn^7 * zn' + 1
+
+*/
+
+float3 mb(float3 p)
 {
-	float displacement = sin(5.0 * p.x) * sin(5.0 * p.y) * sin(5.0 * p.z) * 0.25;
-	float sphere_0 = distance_from_sphere(p, float3(0.0, 0.0, 0.0), 1.0);
-
-	return sphere_0 + displacement;
-}
-
-float3 calculate_normal(float3 p)
-{
-	const float3 small_step = float3(0.001, 0.0, 0.0);
-
-	float gradient_x = map_the_world(p + small_step.xyy) - map_the_world(p - small_step.xyy);
-	float gradient_y = map_the_world(p + small_step.yxy) - map_the_world(p - small_step.yxy);
-	float gradient_z = map_the_world(p + small_step.yyx) - map_the_world(p - small_step.yyx);
-
-	float3 normal = float3(gradient_x, gradient_y, gradient_z);
-
-	return normalize(normal);
-}
-
-
-float3 ray_march(float3 ro, float3 rd)
-{
-	float total_distance_traveled = 0.0;
-	const int NUMBER_OF_STEPS = 32;
-	const float MINIMUM_HIT_DISTANCE = 0.001;
-	const float MAXIMUM_TRACE_DISTANCE = 1000.0;
-
-	for (int i = 0; i < NUMBER_OF_STEPS; ++i)
+	p.xyz = p.xzy;
+	float3 z = p;
+	float3 dz = float3(0.0, 0.0, 0.0);
+	float power = 8.0;
+	float r, theta, phi;
+	float dr = 1.0;
+	
+	float t0 = 1.0;
+	for (int i = 0; i < 7; ++i)
 	{
-		float3 current_position = ro + total_distance_traveled * rd;
-
-		float distance_to_closest = map_the_world(current_position);
-
-		if (distance_to_closest < MINIMUM_HIT_DISTANCE)
-		{
-			float3 normal = calculate_normal(current_position);
-			float3 light_position = float3(2.0, 5.0, 3.0);
-			float3 direction_to_light = normalize(current_position - light_position);
-
-			float diffuse_intensity = max(0.0, dot(normal, direction_to_light));
-
-			return float3(1.0, 0.0, 0.0) * diffuse_intensity;
-		}
-
-		if (total_distance_traveled > MAXIMUM_TRACE_DISTANCE)
-		{
-			break;
-		}
-		total_distance_traveled += distance_to_closest;
+		r = length(z);
+		if (r > 2.0)
+			continue;
+		theta = atan(z.y / z.x);
+		phi = asin(z.z / r);
+		
+		dr = pow(r, power - 1.0) * dr * power + 1.0;
+	
+		r = pow(r, power);
+		theta = theta * power;
+		phi = phi * power;
+		
+		z = r * float3(cos(theta) * cos(phi), sin(theta) * cos(phi), sin(phi)) + p;
+		
+		t0 = min(t0, r);
 	}
-	return float3(0.0, 0.0, 0.0);
+	return float3(0.5 * log(r) * r / dr, t0, 0.0);
+}
+
+float3 f(float3 p)
+{
+	ry(p, 1 * 0.2);
+	return mb(p);
+}
+
+
+float softshadow(float3 ro, float3 rd, float k)
+{
+	float akuma = 1.0, h = 0.0;
+	float t = 0.01;
+	for (int i = 0; i < 50; ++i)
+	{
+		h = f(ro + rd * t).x;
+		if (h < 0.001)
+			return 0.02;
+		akuma = min(akuma, k * h / t);
+		t += clamp(h, 0.01, 2.0);
+	}
+	return akuma;
+}
+
+float3 nor(float3 pos)
+{
+	float3 eps = float3(0.001, 0.0, 0.0);
+	return normalize(float3(
+           f(pos + eps.xyy).x - f(pos - eps.xyy).x,
+           f(pos + eps.yxy).x - f(pos - eps.yxy).x,
+           f(pos + eps.yyx).x - f(pos - eps.yyx).x));
+}
+
+float3 intersect(float3 ro, float3 rd)
+{
+	float t = 1.0;
+	float res_t = 0.0;
+	float res_d = 1000.0;
+	float3 c, res_c;
+	float max_error = 1000.0;
+	float d = 1.0;
+	float pd = 100.0;
+	float os = 0.0;
+	float step = 0.0;
+	float error = 1000.0;
+	float pixel_size = 1.0 / (res * 3.0);
+    
+	for (int i = 0; i < 48; i++)
+	{
+		if (error < pixel_size * 0.5 || t > 20.0)
+		{
+		}
+		else
+		{ // avoid broken shader on windows
+        
+			c = f(ro + rd * t);
+			d = c.x;
+
+			if (d > os)
+			{
+				os = 0.4 * d * d / pd;
+				step = d + os;
+				pd = d;
+			}
+			else
+			{
+				step = -os;
+				os = 0.0;
+				pd = 100.0;
+				d = 1.0;
+			}
+
+			error = d / t;
+
+			if (error < max_error)
+			{
+				max_error = error;
+				res_t = t;
+				res_c = c;
+			}
+        
+			t += step;
+		}
+
+	}
+	if (t > 20.0 /* || max_error > pixel_size*/)
+		res_t = -1.0;
+	return float3(res_t, res_c.y, res_c.z);
 }
 
 float4 main(float4 pos : SV_Position) : SV_Target
 {
-	float halfRes = res * 0.5f;
-	float2 uv = float2((pos.x - halfRes) / halfRes, (pos.y - halfRes) / halfRes);
+	float2 q = pos.xy / res;
+	float2 uv = -1.0 + 2.0 * q;
+	uv.y = 1 - uv.y;
+     
+	// camera
+	float stime = 0.7 + 0.3 * sin(1 * 0.4);
+	float ctime = 0.7 + 0.3 * cos(1 * 0.4);
 
-	float3 camera_position = float3(0.0, 0.0, -5);
-	float3 ro = camera_position;
-	float3 rd = float3(uv, 1.0);
+	float3 ta = float3(0.0, 0.0, 0.0);
+	float3 ro = float3(0.0, 3. * stime * ctime, 3. * (1. - stime * ctime));
 
-	float3 shaded_color = ray_march(ro, rd);
+	float3 cf = normalize(ta - ro);
+	float3 cs = normalize(cross(cf, float3(0.0, 1.0, 0.0)));
+	float3 cu = normalize(cross(cs, cf));
+	float3 rd = normalize(uv.x * cs + uv.y * cu + 3.0 * cf); // transform from view to world
 
-	return float4(shaded_color, 1.0);
+	float3 sundir = normalize(float3(0.1, 0.8, 0.6));
+	float3 sun = float3(1.64, 1.27, 0.99);
+	float3 skycolor = float3(0.6, 1.5, 1.0);
+
+	float3 bg = exp(uv.y - 2.0) * float3(0.4, 1.6, 1.0);
+
+	float halo = clamp(dot(normalize(float3(-ro.x, -ro.y, -ro.z)), rd), 0.0, 1.0);
+	float3 col = bg + float3(1.0, 0.8, 0.4) * pow(halo, 17.0);
+
+
+	float t = 0.0;
+	float3 p = ro;
+	 
+	float3 res = intersect(ro, rd);
+	if (res.x > 0.0)
+	{
+		p = ro + res.x * rd;
+		float3 n = nor(p);
+		float shadow = softshadow(p, sundir, 10.0);
+
+		float dif = max(0.0, dot(n, sundir));
+		float sky = 0.6 + 0.4 * max(0.0, dot(n, float3(0.0, 1.0, 0.0)));
+		float bac = max(0.3 + 0.7 * dot(float3(-sundir.x, -1.0, -sundir.z), n), 0.0);
+		float spe = max(0.0, pow(clamp(dot(sundir, reflect(rd, n)), 0.0, 1.0), 10.0));
+
+		float3 lin = 4.5 * sun * dif * shadow;
+		lin += 0.8 * bac * sun;
+		lin += 0.6 * sky * skycolor * shadow;
+		lin += 3.0 * spe * shadow;
+
+		res.y = pow(clamp(res.y, 0.0, 1.0), 0.55);
+		float3 tc0 = 0.5 + 0.5 * sin(3.0 + 4.2 * res.y + float3(0.0, 0.5, 1.0));
+		col = lin * float3(0.9, 0.8, 0.6) * 0.2 * tc0;
+		col = lerp(col, bg, 1.0 - exp(-0.001 * res.x * res.x));
+	}
+
+    // post
+	col = pow(clamp(col, 0.0, 1.0), float3(0.45, 0.45, 0.45));
+	col = col * 0.6 + 0.4 * col * col * (3.0 - 2.0 * col); // contrast
+	float val = dot(col, float3(0.33, 0.33, 0.33));
+	col = lerp(col, float3(val, val, val), -0.5); // satuation
+	col *= 0.5 + 0.5 * pow(16.0 * q.x * q.y * (1.0 - q.x) * (1.0 - q.y), 0.7); // vigneting
+	return float4(col.xyz, smoothstep(0.55, .76, 1. - res.x / 5.));
 }
